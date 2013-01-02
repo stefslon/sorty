@@ -1,0 +1,180 @@
+/*
+
+  S.Slonevskiy
+  November 2012
+
+*/
+
+/* Important application variables */
+@itemWidth:			140px;
+@emptyHeight: 		70px;
+
+@footerHeight: 		30px;
+
+
+
+html, body { height: 100%; }
+
+
+/* Menu/Toolbar area */
+@font-face {
+	font-family: 'ModernPictogramsNormal';
+	src: url('../fonts/modernpics-webfont.eot');
+	src: url('../fonts/modernpics-webfont.eot?#iefix') format('embedded-opentype'),
+		 url('../fonts/modernpics-webfont.woff') format('woff'),
+		 url('../fonts/modernpics-webfont.ttf') format('truetype'),
+		 url('../fonts/modernpics-webfont.svg#ModernPictogramsNormal') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+.icon {
+	display: inline-block;
+	font: 16px 'ModernPictogramsNormal', Arial, sans-serif;
+	text-align: center;
+	margin-top: 1px;
+	-webkit-font-smoothing: antialiased;
+}
+.size-32 {	font-size: 30px;	width: 32px;	height: 32px;}
+.size-16 {	font-size: 16px;	width: 16px;	height: 16px;}
+.navbar .nav > li > a.has-icon { padding: ((@navbarHeight - 32) / 2) 15px ((@navbarHeight - 32) / 2); }
+
+.status {
+  width: auto;
+  padding-left:  20px;
+  padding-right: 20px;
+  #gradient > .vertical(@navbarBackgroundHighlight, @navbarBackground);
+  border: 1px solid @navbarBorder;
+  .border-radius(@baseBorderRadius);
+  .box-shadow(0 1px 4px rgba(0,0,0,.065));
+
+  // Prevent floats from breaking the navbar
+  .clearfix();
+}
+#menuStatus {
+  margin: 0;
+  padding-top: 7px;
+}
+
+
+
+/* Workarea Styles */
+#workarea {  }
+#itemspace, #sortyspace { display: block; position: absolute; top: (@navbarHeight+2); bottom: (@footerHeight+2); -webkit-overflow-scrolling: touch; }
+
+#itemspace { width: (@itemWidth+15); overflow-x: hidden; overflow-y: auto; padding: 10px; margin-right: 10px; z-index: 500; margin: 0; }
+#sortyspace { left: (@itemWidth+45); right: 0; overflow: auto; padding: 10px; padding-left: 20px; z-index: 510; }
+
+#footerspace { display: block; position: absolute; height: @footerHeight; bottom: 0; right: 0; left: 0; }
+
+#alert-area { position: absolute; bottom: (@footerHeight+5); left: 0; height: 40px; width: 100%; z-index: 520; }
+
+
+
+/* Custom typography elements */
+.center { text-align: center; }
+
+
+
+/* Alert area styling */
+#alert-area {
+	font-weight: bold;
+}
+
+
+
+
+
+/* Container styles */
+.bucket {
+	float: left;
+	width: (@itemWidth+30);
+	padding: 1px;
+	margin: 7px;
+	background-color: @popoverBackground;
+	-webkit-background-clip: padding-box;
+	-moz-background-clip: padding;
+	background-clip: padding-box;
+	border: 1px solid #ccc;
+	border: 1px solid rgba(0,0,0,.2);
+	.border-radius(6px);
+	.box-shadow(0 5px 10px rgba(0,0,0,.2));
+}
+.bucket-header {
+	cursor: pointer;
+	margin: 0; // reset heading margin
+	padding: @paddingLarge;
+	font-size: 11px;
+	font-weight: normal;
+	line-height: 16px;
+	background-color: @popoverTitleBackground;
+	border-bottom: 1px solid darken(@popoverTitleBackground, 5%);
+	.border-radius(5px 5px 0 0);
+	#size {
+		visibility: hidden;
+	}
+	input.bucket-name-input {
+		width: (@itemWidth - 50);
+		margin: 0;
+		padding: 0 5px 0;
+	}
+	input.bucket-size-input {
+		width: 15px;
+		margin: 0;
+		padding: 0 2px 0;
+		text-align: center;
+	}
+}
+.bucket-content {
+	padding: @paddingLarge;
+	margin-bottom: 0;
+}
+.hover {
+	border-color: rgba(82,168,236,.8);
+	outline: 0;
+	outline: thin dotted \9; /* IE6-9 */
+	.box-shadow(~"inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6)");
+}
+
+
+/* Items styling */
+.enabled {
+	
+}
+.selection-list, li.ui-sortable-helper {
+	margin-left: 0;
+	/*margin-bottom: @baseLineHeight;*/
+	min-height: @emptyHeight;
+	list-style: none;
+	input {
+		width: (@itemWidth - 50);
+		margin: 0;
+		padding: 0 5px 0;
+		text-align: center;
+	}
+}
+li.ui-sortable-helper a, .selection-list > li > a {
+	display: block;
+	width: @itemWidth;
+	cursor: pointer;
+	text-align: center;
+	background-color: @grayDark;
+	padding: 3px 0;
+	margin: 2px 0;
+	border: 1px solid #ccc;
+	border: 1px solid rgba(0,0,0,.2);
+	.border-radius(5px);
+	line-height: @baseLineHeight; // keeps the overall height an even number
+}
+li.ui-sortable-helper a:hover, .selection-list > li > a:hover {
+	text-decoration: none;
+	background-color: @gray;
+}
+.selection-list {
+	.clearfix();
+}
+.selection-list > li {
+	float: none;
+}
+
+

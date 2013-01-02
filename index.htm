@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Sorty</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<!-- Le styles -->
+	<link href="css/sorty.css" rel="stylesheet">
+
+	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+	<!--[if lt IE 9]>
+		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	
+</head>
+
+<body>
+
+	<!-- Navigation bar -->
+	<div class="navbar navbar-static-top">
+		<div class="navbar-inner">
+			<a class="brand" href="#">Sorty</a>
+			
+			<ul class="nav">
+				<li><a id="menuSave" href="#" class="has-icon" rel="tooltip" title="Save data [ctrl+s]" data-placement="bottom"><i class="icon size-32">]</i></a></li>
+				<li class="divider-vertical"></li>
+				<li><a id="menuAddItem" href="#" class="has-icon" rel="tooltip" title="Add guests [ctrl+a]" data-placement="bottom"><i class="icon size-32">+</i></a></li>
+				<li><a id="menuAddContainer" href="#" class="has-icon" rel="tooltip" title="Add room [ctrl+q]" data-placement="bottom"><i class="icon size-32">W</i></a></li>
+				<li><a id="menuEditContainer" href="#" class="has-icon" rel="tooltip" title="Edit rooms [ctrl+e]" data-placement="bottom"><i class="icon size-32">V</i></a></li>
+				<li class="divider-vertical"></li>
+				<li><a id="menuExport" href="#" class="has-icon" rel="tooltip" title="Export assignment data [ctrl+p]" data-placement="bottom"><i class="icon size-32">o</i></a></li>
+				<li class="divider-vertical"></li>
+				<li><a id="menuPrint" href="#" class="has-icon" rel="tooltip" title="Print" data-placement="bottom"><i class="icon size-32">d</i></a></li>
+				<li class="divider-vertical"></li>
+				<li><a id="menuRestart" href="#" class="has-icon" rel="tooltip" title="Start from scratch" data-placement="bottom"><i class="icon size-32">R</i></a></li>
+				<li class="divider-vertical"></li>
+			</ul>
+
+			<ul class="nav pull-right">
+				<li class="divider-vertical"></li>
+				<li><a id="menuAbout" href="#" class="has-icon" rel="tooltip" title="About Sorty" data-placement="bottom"><i class="icon size-32">=</i></a></li>
+			</ul>
+
+		</div>
+	</div>
+
+	<!-- Work area -->
+	<div id="workarea">
+
+		<!-- Items list -->
+		<ul id="itemspace" class="selection-list enabled">
+		</ul>
+
+		<!-- Container list -->
+		<div id="sortyspace">
+		</div>
+
+	</div>
+	
+	<!-- Footer/Status area -->
+	<div id="footerspace" class="status">
+		<p id="menuStatus" class="center">N/A</p>
+	</div>
+
+	<!-- ********************************************************************************************* -->
+	<!--                              Modal Dialogs/Windows                                            -->
+	<!-- ********************************************************************************************* -->
+	<div id="wndwAbout" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="wndwAboutLabel" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+			<h3 id="wndwAboutLabel">About Sorty</h3>
+		</div>
+		<div class="modal-body">
+			<p>Latest version and bug reports: https://github.com/stefslon</p>
+			<p>Additional libraries used:
+				<ul>
+					<li>jQuery / jQuery UI</li>
+					<li>jStorage</li>
+					<li>jsPDF -- https://github.com/MrRio/jsPDF</li>
+					<li>Twitter Bootstrap -- http://twitter.github.com/bootstrap/</li>
+					<li>Bootbox.js -- http://bootboxjs.com/</li>
+					<li>jQuery Hotkeys -- https://github.com/tzuryby/jquery.hotkeys</li>
+					<li>Modern Pictograms font -- http://thedesignoffice.org/project/modern-pictograms/</li>
+				</ul>
+			</p>
+		</div>
+		<div class="modal-footer">
+			<button type="button" id="btn-ok" class="btn btn-primary"><i class="icon size-16">%</i> Got it!</button>
+		</div>
+	</div>
+
+	<!-- ********************************************************************************************* -->
+	<div id="wndwContProj" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="wndwNewLabel" aria-hidden="true">
+		<div class="modal-header">
+			<h3 id="wndwNewLabel">Previous Project Found</h3>
+		</div>
+		<div class="modal-body">
+			<p>Found previously saved work. Would you like to continue working on this project? Note, starting new project will wipe any information about the old project.</p>
+		</div>
+		<div class="modal-footer">
+			<button type="button" id="btn-restart" class="btn btn-danger"><i class="icon size-16">X</i> Start Fresh</button>
+			<button type="button" id="btn-continue" class="btn btn-primary"><i class="icon size-16">%</i> Continue</button>
+		</div>
+	</div>
+
+	<!-- ********************************************************************************************* -->
+	<div id="wndwNew" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="wndwNewLabel" aria-hidden="true">
+		<div class="modal-header">
+			<h3 id="wndwNewLabel">Start New Project</h3>
+		</div>
+		<div class="modal-body">
+			<p><strong>Hello and welcome!</strong> To begin sorting and assigning you will need to answer a few very simple questions.</p>
+			<form>
+				<fieldset>
+					<label for="item_name">Who or what are you assigning? <br />
+						<small>(for example, guests if dealing with a wedding reception, or campers if dealing with a camp)</small>
+					</label>
+					<input type="text" name="item_name" id="item_name" class="input-block-level" value="Guests" />
+					
+					<label for="container_name">What are you assigning <span class="item_name_placeholder">items</span> to? <br />
+						<small>(for example, table if dealing with a wedding reception, or room if dealing with campers)</small>
+					</label>
+					<input type="text" name="container_name" id="container_name" class="input-block-level" value="Rooms" />
+
+					<label for="container_count">How many <span class="container_name_placeholder">containers</span> do you have? <br />
+						<small>(the total number of tables at the reception or rooms at the camp)</small>
+					</label>
+					<input type="text" name="container_count" id="container_count" class="input-block-level" value="10" />
+
+					<label for="container_size">What is the average size of your <span class="container_name_placeholder"></span>? <br />
+						<small>(for example, the number of seats per table or beds per room. This number can be adjusted individually for all <span id="container_name_placeholder"></span>)</small>
+					</label>
+					<input type="text" name="container_size" id="container_size" class="input-block-level" value="5" />
+
+				</fieldset>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button type="button" id="btn-ok" class="btn btn-primary"><i class="icon size-16">%</i> Done</button>
+		</div>
+	</div>
+
+	<!-- ********************************************************************************************* -->
+	<div id="wndwDeleteContainer" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="wndwNewLabel" aria-hidden="true">
+		<div class="modal-header">
+			<h3 id="wndwNewLabel">Confirmation</h3>
+		</div>
+		<div class="modal-body">
+			<p>Are you sure you want to delete this <span class="container_singular_name_placeholder">container</span>?</p>
+		</div>
+		<div class="modal-footer">
+			<button type="button" id="btn-delete" class="btn btn-danger"><i class="icon size-16">X</i> Delete</button>
+			<button type="button" id="btn-cancel" class="btn btn-primary"><i class="icon size-16">%</i> Cancel</button>
+		</div>
+	</div>
+
+	<!-- ********************************************************************************************* -->
+	<div id="wndwDeleteItem" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="wndwNewLabel" aria-hidden="true">
+		<div class="modal-header">
+			<h3 id="wndwNewLabel">Confirmation</h3>
+		</div>
+		<div class="modal-body">
+			<p>Are you sure you want to delete this <span class="item_singular_name_placeholder">item</span>?</p>
+		</div>
+		<div class="modal-footer">
+			<button type="button" id="btn-delete" class="btn btn-danger"><i class="icon size-16">X</i> Delete</button>
+			<button type="button" id="btn-cancel" class="btn btn-primary"><i class="icon size-16">%</i> Cancel</button>
+		</div>
+	</div>
+
+	<!-- ********************************************************************************************* -->
+	<div id="wndwAddItems" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="wndwNewLabel" aria-hidden="true">
+		<div class="modal-header">
+			<h3 id="wndwNewLabel">Add <span class="item_name_placeholder">guests</span></h3>
+		</div>
+		<div class="modal-body">
+			<p><span class="item_name_placeholder">Guests</span> can be added by typing in the list or by pasting your list into the textbox below. Each name should appear on a new line.</p>
+			<textarea rows="10" name="item_list" id="item_list" class="input-block-level"></textarea>
+		</div>
+		<div class="modal-footer">
+			<button type="button" id="btn-add" class="btn btn-primary"><i class="icon size-16">%</i> Add</button>
+			<button type="button" id="btn-cancel" class="btn btn-danger"><i class="icon size-16">X</i> Cancel</button>
+		</div>
+	</div>
+
+	<!-- ********************************************************************************************* -->
+	<div id="wndwExport" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="wndwNewLabel" aria-hidden="true">
+		<div class="modal-header">
+			<h3 id="wndwNewLabel">Export Assignment Data</span></h3>
+		</div>
+		<div class="modal-body">
+			<p>Here is your comma-separated list of assignments. You can save it with .CSV extention and open it in Excel.</p>
+			<textarea rows="10" name="export_text" id="export_text" class="input-block-level" disabled></textarea>
+		</div>
+		<div class="modal-footer">
+			<button type="button" id="btn-ok" class="btn btn-primary"><i class="icon size-16">%</i> Ok</button>
+		</div>
+	</div>
+
+	<!-- ********************************************************************************************* -->
+	<div id="wndwRestart" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="wndwNewLabel" aria-hidden="true">
+		<div class="modal-header">
+			<h3 id="wndwNewLabel">Start From Scratch</span></h3>
+		</div>
+		<div class="modal-body">
+			<p>Are you sure you want to delete all of your work and start from scratch? All the hard work you have done will be forever lost.</p>
+		</div>
+		<div class="modal-footer">
+			<button type="button" id="btn-delete" class="btn btn-danger"><i class="icon size-16">%</i> Start From Scratch</button>
+			<button type="button" id="btn-cancel" class="btn btn-primary"><i class="icon size-16">X</i> Cancel</button>
+		</div>
+	</div>
+
+	<!-- ********************************************************************************************* -->
+	<div id="wndwEditContainers" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="wndwNewLabel" aria-hidden="true">
+		<div class="modal-header">
+			<h3 id="wndwNewLabel">Edit <span class="container_name_placeholder">room</span></h3>
+		</div>
+		<div class="modal-body">
+			<p>In the following dialog you can quickly edit all of your <span class="container_name_placeholder">room</span>. Each <span class="container_singular_name_placeholder">room</span> should appear on a new line. Comma separates the name of the <span class="container_singular_name_placeholder">room</span> with the amount of available spots in each <span class="container_singular_name_placeholder">room</span>.</p>
+			<textarea rows="10" name="containers_changes" id="containers_changes" class="input-block-level"></textarea>
+		</div>
+		<div class="modal-footer">
+			<button type="button" id="btn-change" class="btn btn-primary"><i class="icon size-16">%</i> Change</button>
+			<button type="button" id="btn-cancel" class="btn btn-danger"><i class="icon size-16">X</i> Cancel</button>
+		</div>
+	</div>
+
+	​
+
+	<!-- ********************************************************************************************* -->
+	<!--                              Java Script Libraries                                            -->
+	<!-- ********************************************************************************************* -->
+	<!-- Scripts go at the end -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script src="js/jquery-ui-1.9.2.custom.min.js"></script>
+	<script src="jsedit/bootstrap-transition.js"></script>
+	<script src="jsedit/bootstrap-modal.js"></script>
+	<script src="jsedit/bootstrap-dropdown.js"></script>
+	<script src="jsedit/bootstrap-tooltip.js"></script>
+	<script src="jsedit/bootstrap-button.js"></script>
+	<script src="jsedit/bootstrap-alert.js"></script>
+	<script src="jsedit/bootstrap-typeahead.js"></script>
+
+	<!-- Additional JS libraries -->
+	<script src="js/bootbox-2.5.0.min.js"></script>
+	<script src="js/jquery.json-2.4.min.js"></script>
+	<script src="jsedit/jstorage-0.3.0.js"></script>
+	<script src="jsedit/jquery.hotkeys-0.8.js"></script>
+
+	<script src="js/jspdf.min.js"></script>
+	
+	<!-- Sorty "brains" -->
+	<script src="jsedit/sorty-main.js"></script>
+	
+	<!-- <li class="item ui-sortable-helper" style="position: absolute; left: 350px; top: 350px; "><a>Mitya</a></li> -->
+
+</body>
+
+</html>
