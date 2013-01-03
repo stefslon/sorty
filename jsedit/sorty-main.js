@@ -50,6 +50,9 @@ $(document).ready(function(){
 				container_count = $.jStorage.get('container_count');
 				container_size = $.jStorage.get('container_size');
 				item_name = $.jStorage.get('item_name');
+
+				// Reset container positions
+				resetContainerPositions();
 				
 				newAlert("success","Restored previous work");
 
@@ -113,24 +116,19 @@ $(document).ready(function(){
 					createContainer(ii, '', container_size);
 				}
 
-				// Walk through all created container and get their position
-				// Then reset CSS positioning to absolute
-				ii=0;
-				var xpos = [];
-				var ypos = [];
-				$(".bucket").each(function(idx,val) {
-					xpos[ii] = $(val).position().top;
-					ypos[ii] = $(val).position().left;
-					ii++;
-				});
-				ii=0;
-				$(".bucket").each(function(idx,val) {
-					$(val).css({ position: "absolute",
-						marginLeft: 0, marginTop: 0,
-						top: xpos[ii], left: ypos[ii] });
-					ii++;
+				// Reset container positions
+				resetContainerPositions();
+
+				// Add "Add Item" help text
+				var tipItem = $('<div id="add_item_tip">Add ' + titleCaps(item_name) + '</div>');
+				tipItem.hide();
+				$("body").append(tipItem);
+				tipItem.delay(1000).fadeIn(2000);
+				tipItem.one('click',function() {
+					$("#menuAddItem").trigger('click');
 				});
 
+				// Enable jQuery sorting, dragging, etc.
 				enableWorkspace();
 
 				$(document).focus(); // need to reset, otherwise can't catch keypresses
@@ -154,59 +152,60 @@ $(document).ready(function(){
 			var parentContainer = $(this).parent();
 			var oldSize = getContainerSize(parentContainer);
 			var oldName = getContainerName(parentContainer);
-			
-			// Experimental in-inline container editing
-			var inpField = $('<input class="bucket-name-input" type="text" id="inpNewName" name="inpNewName" value="' + oldName + '" />');
-			$("#name",$(this)).html(inpField);
-			$(inpField).focus().select();
-			
-			$(inpField).one('keydown.return', function() {
-				// Accepted new value
-				$(inpField).trigger('blur'); return false;
-			});
-			$(inpField).one('keydown.esc', function() {
-				// Cancelled new value (restore old name)
-				$("#name",parentContainer).html(oldName); return false;
-			});
 
-			$(inpField).blur(function() {
-				// Accepted new value
-				if($(this).val().length){
-					// Has a valid name
-					//$("#name",parentContainer).html($(this).val());
-					modifyContainer(parentContainer, oldSize, $(this).val());
-				}
-				else {
-					// No valid name provided, ask if want to delete
-					$("#name",parentContainer).html("* * *");
-					$("#wndwDeleteContainer").modal({ keyboard: false });
-					// modal box events
-					$('#wndwDeleteContainer').on('shown', function() {
-						var parentContainer = $(this);
-						// Return or Delete confirmed
-						parentContainer.one('keydown.return', function() {
-							$("#btn-delete", parentContainer).trigger('click'); return false;
-						});
-						$("#btn-delete", parentContainer).one('click',function() {
-							// Remove container
-							removeContainer(parentContainer);
-							parentContainer.modal('hide');
-							return false;
-						});
+			if(oldName!="") {
+				// In-inline container editing
+				var inpField = $('<input class="bucket-name-input" type="text" id="inpNewName" name="inpNewName" value="' + oldName + '" />');
+				$("#name",$(this)).html(inpField);
+				$(inpField).focus().select();
+				
+				$(inpField).one('keydown.return', function() {
+					// Accepted new value
+					$(inpField).trigger('blur'); return false;
+				});
+				$(inpField).one('keydown.esc', function() {
+					// Cancelled new value (restore old name)
+					$("#name",parentContainer).html(oldName); return false;
+				});
 
-						// Escape or cancel 
-						parentContainer.one('keydown.esc', function() {
-							$("#btn-cancel", parentContainer).trigger('click'); return false;
+				$(inpField).blur(function() {
+					// Accepted new value
+					if($(this).val().length){
+						// Has a valid name
+						modifyContainer(parentContainer, oldSize, $(this).val());
+					}
+					else {
+						// No valid name provided, ask if want to delete
+						$("#name",parentContainer).html("* * *");
+						$("#wndwDeleteContainer").modal({ keyboard: false });
+						// modal box events
+						$('#wndwDeleteContainer').on('shown', function() {
+							var parentContainer = $(this);
+							// Return or Delete confirmed
+							parentContainer.one('keydown.return', function() {
+								$("#btn-delete", parentContainer).trigger('click'); return false;
+							});
+							$("#btn-delete", parentContainer).one('click',function() {
+								// Remove container
+								removeContainer(parentContainer);
+								parentContainer.modal('hide');
+								return false;
+							});
+
+							// Escape or cancel 
+							parentContainer.one('keydown.esc', function() {
+								$("#btn-cancel", parentContainer).trigger('click'); return false;
+							});
+							$("#btn-cancel", parentContainer).one('click',function() {
+								// Restore old name, do not delete container
+								$("#name",parentContainer).html(oldName);
+								parentContainer.modal('hide');
+								return false;
+							});
 						});
-						$("#btn-cancel", parentContainer).one('click',function() {
-							// Restore old name, do not delete container
-							$("#name",parentContainer).html(oldName);
-							parentContainer.modal('hide');
-							return false;
-						});
-					});
-				}
-			});
+					}
+				});
+			}
 		});
 
 		// Add ability to change the capacity of individual containers
@@ -218,8 +217,8 @@ $(document).ready(function(){
 			var oldSize = getContainerSize(parentContainer);
 			var oldAvail = getContainerAvailable(parentContainer);
 			var oldUsed = oldSize-oldAvail;
-			
-			// Experimental in-inline container editing
+
+			// In-inline container editing
 			var inpField = $('<input class="bucket-size-input" type="text" id="inpNewSize" name="inpNewSize" value="' + oldSize + '" />');
 			$(availElement).html(inpField);
 			$(inpField).focus().select();
@@ -262,69 +261,60 @@ $(document).ready(function(){
 			var clickedItem = $(this);
 			var oldName = $(this).text();
 
-			// Experimental in-inline container editing
-			var inpField = $('<input class="item-name-input" type="text" id="inpNewName" name="inpNewName" value="' + oldName + '" />');
-			$("a",clickedItem).html(inpField);
-			$(inpField).focus().select();
-			
-			$(inpField).one('keydown.return', function() {
-				// Accepted new value
-				$(inpField).trigger('blur'); return false;
-			});
-			$(inpField).one('keydown.esc', function() {
-				// Cancelled new value (restore old name)
-				$("a",clickedItem).html(oldName); return false;
-			});
+			if(oldName!="") {
+				// In-inline container editing
+				var inpField = $('<input class="item-name-input" type="text" id="inpNewName" name="inpNewName" value="' + oldName + '" />');
+				$("a",clickedItem).html(inpField);
+				$(inpField).focus().select();
+				
+				$(inpField).one('keydown.return', function() {
+					// Accepted new value
+					$(inpField).trigger('blur'); return false;
+				});
+				$(inpField).one('keydown.esc', function() {
+					// Cancelled new value (restore old name)
+					$("a",clickedItem).html(oldName); return false;
+				});
 
-			$(inpField).blur(function() {
-				// Accepted new value
-				if($(this).val().length){
-					// Has a valid name
-					$("a",clickedItem).text($(this).val());
-				}
-				else {
-					// No valid name provided, ask if want to delete
-					$("a",clickedItem).html("* * *");
-					$("#wndwDeleteItem").modal({ keyboard: false });
-					// modal box events
-					$('#wndwDeleteItem').on('shown', function() {
-						var parentContainer = $("#wndwDeleteItem");
-						// Return or Delete confirmed
-						parentContainer.one('keydown.return', function() {
-							$("#btn-delete", parentContainer).trigger('click'); return false;
-						});
-						$("#btn-delete", parentContainer).one('click',function() {
-							// Remove item
-							removeItem(clickedItem);
-							parentContainer.modal('hide');
-							return false;
-						});
+				$(inpField).blur(function() {
+					// Accepted new value
+					if($(this).val().length){
+						// Has a valid name
+						$("a",clickedItem).text($(this).val());
+					}
+					else {
+						// No valid name provided, ask if want to delete
+						$("a",clickedItem).html("* * *");
+						$("#wndwDeleteItem").modal({ keyboard: false });
+						// modal box events
+						$('#wndwDeleteItem').on('shown', function() {
+							var parentContainer = $("#wndwDeleteItem");
+							// Return or Delete confirmed
+							parentContainer.one('keydown.return', function() {
+								$("#btn-delete", parentContainer).trigger('click'); return false;
+							});
+							$("#btn-delete", parentContainer).one('click',function() {
+								// Remove item
+								removeItem(clickedItem);
+								parentContainer.modal('hide');
+								return false;
+							});
 
-						// Escape or cancel 
-						parentContainer.one('keydown.esc', function() {
-							$("#btn-cancel", parentContainer).trigger('click'); return false;
+							// Escape or cancel 
+							parentContainer.one('keydown.esc', function() {
+								$("#btn-cancel", parentContainer).trigger('click'); return false;
+							});
+							$("#btn-cancel", parentContainer).one('click',function() {
+								// Restore old name, do not delete tem
+								$("a",clickedItem).html(oldName);
+								parentContainer.modal('hide');
+								return false;
+							});
 						});
-						$("#btn-cancel", parentContainer).one('click',function() {
-							// Restore old name, do not delete tem
-							$("a",clickedItem).html(oldName);
-							parentContainer.modal('hide');
-							return false;
-						});
-					});
-				}
-			});
+					}
+				});
+			}
 		});
-
-		// Add help text to add items if there are none
-		// if ($("#items li").length === 0) {
-		// 	var tipItem = $('<div id="add_item_tip">Add ' + titleCaps(item_name) + '</div>');
-		// 	tipItem.hide();
-		// 	$("#items_panel").append(tipItem);
-		// 	tipItem.delay(1000).fadeIn(2000);
-		// 	tipItem.click(function() {
-		// 		$("#add_item").trigger('click');
-		// 	});
-		// }
 		
 		// Update toolbar tips
 		updateToolbar();
@@ -453,8 +443,9 @@ $(document).ready(function(){
 			}
 		}
 		else {
-			//removeHelpText();
+			removeHelpText();
 		}
+		updateStatus();
 	}
 
 	// Remove container
@@ -466,6 +457,7 @@ $(document).ready(function(){
 			itemsPanel.append(val);
 		});
 		container.animate({opacity:0},1000, function() { $(this).remove(); updateStatus(); });
+		updateStatus();
 	}
 
 
@@ -474,7 +466,28 @@ $(document).ready(function(){
 		container.find("#size").text(size);
 		container.find("#name").text(name);
 		updateContainer(container);
-		updateStatus();
+	}
+
+
+	// Walk through all created container and get their position
+	// Then reset CSS positioning to absolute
+	// This ensures that created container do no overlap each other
+	function resetContainerPositions() {
+		ii=0;
+		var xpos = [];
+		var ypos = [];
+		$(".bucket").each(function(idx,val) {
+			xpos[ii] = $(val).position().top;
+			ypos[ii] = $(val).position().left;
+			ii++;
+		});
+		ii=0;
+		$(".bucket").each(function(idx,val) {
+			$(val).css({ position: "absolute",
+				marginLeft: 0, marginTop: 0,
+				top: xpos[ii], left: ypos[ii] });
+			ii++;
+		});
 	}
 
 
@@ -514,9 +527,15 @@ $(document).ready(function(){
 			else unassignedItems += 1;
 		});
 		var statusText = '';
-		statusText += '<small>Total of ' + totalContainers + ' ' + container_name + ' can fit ' + totalCapacity + ' ' + item_name + ', with ' + availCapacity + ' spots still available</small> ';
-		statusText += '<small>Out of ' + (unassignedItems+assignedItems) + ' ' + item_name + ', ' + assignedItems + ' are already assigned and ' + unassignedItems + ' unassigned</small>';
+		statusText += 'Total of ' + totalContainers + ' ' + container_name + ' can fit ' + totalCapacity + ' ' + item_name + ', with ' + availCapacity + ' spots still available ';
+		statusText += 'Out of ' + (unassignedItems+assignedItems) + ' ' + item_name + ', ' + assignedItems + ' are already assigned and ' + unassignedItems + ' unassigned';
 		$("#menuStatus").html(statusText);
+	}
+
+
+	// Fade out help text (for add items)
+	function removeHelpText() {
+		$("#add_item_tip").animate({opacity:0},500, function() { $(this).remove(); });
 	}
 	
 
@@ -588,7 +607,7 @@ $(document).ready(function(){
 
 			// add
 			$("#btn-add", parentElement).one('click',function() {
-				// removeHelpText();
+				removeHelpText();
 				var item_list = $("#item_list").val();
 				if(item_list.length>0) {
 					$.each(item_list.split("\n"), function(idx,val) {
@@ -745,6 +764,9 @@ $(document).ready(function(){
 					}
 				});
 
+				// Reset all newly created containers
+				resetContainerPositions();
+
 				$(document).focus(); // need to reset, otherwise can't catch keypresses
 				parentElement.modal('hide');
 				return false;
@@ -836,12 +858,11 @@ $(document).ready(function(){
 								Modal dialogs actions
 	************************************************************************/
 	$("#menuAbout").click(function() {
-		console.log("Clicked");
 		$('#wndwAbout').modal({
 			keyboard: true
 		});
 		// modal box handles
-		$("#btn-ok",$('#wndwAbout')).click(function() {
+		$("#btn-ok",$('#wndwAbout')).one('click',function() {
 			$("#wndwAbout").modal('hide');
 		});
 		return false;
@@ -897,10 +918,13 @@ $(document).ready(function(){
 })();
 
 
+// Remove spaces and other non-printable characters from the string
 function deblank(someText) {
 	return someText.replace(/(\r\n|\n|\r)/gm,"");
 }
 
+
+// Alert function
 function newAlert(type, message) {
 	// Possible types:
 	//	- error
@@ -911,44 +935,6 @@ function newAlert(type, message) {
 	$("#alert-area").delay(2000).fadeOut("slow", function () { $(this).remove(); });
 }
 
-
-
-
-
-/*
-$(".selection-list li").draggable({
-	addClasses: false
-});
-$(".bucket").draggable({
-	addClasses: false
-});
-
-
-$(".bucket-header").dblclick(function() {
-	$('#test').modal({
-		keyboard: true
-	});
-
-	// modal box events
-	$('#myModal').on('shown', function() {
-		$('#textline').focus();
-	})
-
-	// modal box handles
-	$("#btn-save").click(function() {
-		$("#myModal").modal('hide');
-	});
-
-	$("#btn-delete").click(function() {
-		$("#myModal").modal('hide');
-	});
-});
-*/
-/*
-$(".bucket-header").dblclick(function() {
-newAlert('success', 'Oh yeah!');
-});
-*/
 
 // Turn on navigation bar tooltips
 $('.navbar-inner').tooltip({

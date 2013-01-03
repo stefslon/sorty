@@ -40,20 +40,20 @@ html, body { height: 100%; }
 .navbar .nav > li > a.has-icon { padding: ((@navbarHeight - 32) / 2) 15px ((@navbarHeight - 32) / 2); }
 
 .status {
-  width: auto;
-  padding-left:  20px;
-  padding-right: 20px;
-  #gradient > .vertical(@navbarBackgroundHighlight, @navbarBackground);
-  border: 1px solid @navbarBorder;
-  .border-radius(@baseBorderRadius);
-  .box-shadow(0 1px 4px rgba(0,0,0,.065));
+	width: auto;
+	padding-left:  20px;
+	padding-right: 20px;
+	#gradient > .vertical(@navbarBackgroundHighlight, @navbarBackground);
+	border: 1px solid @navbarBorder;
+	.border-radius(@baseBorderRadius);
+	.box-shadow(0 1px 4px rgba(0,0,0,.065));
 
-  // Prevent floats from breaking the navbar
-  .clearfix();
+	// Prevent floats from breaking the navbar
+	.clearfix();
 }
 #menuStatus {
-  margin: 0;
-  padding-top: 7px;
+	margin: 0;
+	padding-top: 7px;
 }
 
 
@@ -67,7 +67,7 @@ html, body { height: 100%; }
 
 #footerspace { display: block; position: absolute; height: @footerHeight; bottom: 0; right: 0; left: 0; }
 
-#alert-area { position: absolute; bottom: (@footerHeight+5); left: 0; height: 40px; width: 100%; z-index: 520; }
+#alert-area { position: absolute; top: (@navbarHeight+10); left: 0; height: 40px; width: 100%; z-index: 520; }
 
 
 
@@ -79,6 +79,25 @@ html, body { height: 100%; }
 /* Alert area styling */
 #alert-area {
 	font-weight: bold;
+}
+
+
+/* Help text styling */
+#add_item_tip {
+	position: absolute;
+    top: 50%;
+	margin-left: 10px;
+	display: block;
+	width: @itemWidth;
+	cursor: hand; cursor: pointer;
+	text-align: center;
+	background-color: @grayDarker;
+	color: @grayLight;
+	padding: 3px 0;
+	border: 1px solid rgba(82,168,236,.6);
+	.border-radius(5px);
+	.box-shadow(~"inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6)");
+	z-index: 530;
 }
 
 
