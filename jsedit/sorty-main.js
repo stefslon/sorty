@@ -19,13 +19,7 @@ var item_name;
 var elemHeight = 24; // approximate element height for container sizing
 
 
-/*$("#menuAddItem").click(function(){
-	newAlert("error","Hello there, my friend!");
-});*/
-
-
 $(document).ready(function(){
-
 
 	// Check if there is a previously saved work
 	var prevWork = $.jStorage.get('containers', '');
@@ -823,7 +817,7 @@ $(document).ready(function(){
 		$(".bucket").each(function(idx,val) {
 			var bucketX = $(val).position().left+widthMargin;
 			var bucketY = $(val).position().top+heightMargin;
-			doc.rect(bucketX, bucketY, $(val).width(), $(val).height()); // empty square
+			doc.roundedrect(bucketX, bucketY, $(val).width(), $(val).height(), 10, 10); // empty square
 			
 			// Add container name
 			doc.setFontType("bold");
