@@ -7,5 +7,5 @@ I wrote this tool when I had to sort guests into rooms for our church retreat. R
 
 This tool can also be used to assign guests to tables at the wedding reception. Or campers to cabins. Or whatever else that you need to sort.
 
-Online version of the tool is hosted at http://www.nesbc.com/sorty/
+Online version of the tool is hosted at http://stefslon.github.io/sorty/
 
