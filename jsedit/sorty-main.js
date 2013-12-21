@@ -388,22 +388,43 @@ $(document).ready(function(){
 		newContainer    += '	<ul class="bucket-content selection-list enabled" style="min-height:' + (elemHeight*size) +'px;"></ul>\n';
 		newContainer    += '</div>\n\n';
 		jNewContainer    = $(newContainer);
-		jNewContainer.hide();
+		jNewContainer.invisible();
 		jNewContainer.draggable({ snap: true });
 		$("#sortyspace").append(jNewContainer);
-		jNewContainer.fadeIn(1000);
+
 		updateContainer(jNewContainer);
 		updateStatus();
+		makeSortable();
+
 		// Setup absolute CSS position only if requested
 		if ((setAbsolute!==undefined) & (setAbsolute)) {
 			jNewContainer.css({
 				position: "absolute",
 				marginLeft: 0,
-				marginTop: 0
+				marginTop: 0,
+				top: 10,
+				left: 20
 			});
+
+			// Keep moving newly created object, until no collision is detected
+			var stepX 	= 47;
+			var stepY 	= 61;
+			var numIter = 0;
+			while ( (overlaps( jNewContainer, ".bucket" )) && numIter<1500 ) {
+				var pos = jNewContainer.position();
+				var newLeft = pos.left+stepX;
+				var newTop = pos.top;
+				if ( (newLeft+jNewContainer.width())>$("#sortyspace").width() ) {
+					newLeft = 0;
+					newTop = pos.top+stepY;
+				}
+				//console.log(" moving " + newTop + " " + newLeft);
+				jNewContainer.css({ top: newTop, left: newLeft});
+				numIter++;
+			}
 		}
-		// refresh
-		makeSortable();
+
+		jNewContainer.hide().visible().fadeIn(1000);
 	}
 
 
@@ -945,3 +966,56 @@ $('.navbar-inner').tooltip({
 	selector: "a[rel=tooltip]"
 });
 
+
+// Simple overlap/collision test
+// Source: http://jsfiddle.net/98sAG/
+var overlaps = (function () {
+	function getPositions( elem ) {
+		var pos, width, height;
+		pos = $( elem ).position();
+		width = $( elem ).width();
+		height = $( elem ).height();
+		return [ [ pos.left, pos.left + width ], [ pos.top, pos.top + height ] ];
+	}
+
+	function comparePositions( p1, p2 ) {
+		var r1, r2;
+		r1 = p1[0] < p2[0] ? p1 : p2;
+		r2 = p1[0] < p2[0] ? p2 : p1;
+		return r1[1] > r2[0] || r1[0] === r2[0];
+	}
+
+	return function ( me, other ) {
+		var pos1 = getPositions( me );
+		//console.log("overlap func, pos1=" + pos1);
+		var returnVal = false;
+		$(other).each(function(idx,val) {
+			if (!me.is(val)) {
+				var pos2 = getPositions( $(val) );
+				//console.log("overlap func, pos2=" + pos2);
+				returnVal = (returnVal) || ( comparePositions( pos1[0], pos2[0] ) && comparePositions( pos1[1], pos2[1] ) );
+			}
+		});
+
+		return returnVal;
+	};
+})();
+
+
+// Use these instead of show()/hide() because show and hide use display: none, which removes the element from the document, 
+// so it is not available for change even though the markup is there. Use visibility: hidden; to hide the element rather than remove it.
+// Source: http://forum.jquery.com/topic/how-do-i-get-position-left-of-a-hidden-element
+// Source: http://stackoverflow.com/questions/9614622/equivalent-of-jquery-hide-to-set-visibility-hidden
+jQuery.fn.visible = function() {
+    return this.css('visibility', 'visible');
+};
+
+jQuery.fn.invisible = function() {
+    return this.css('visibility', 'hidden');
+};
+
+jQuery.fn.visibilityToggle = function() {
+    return this.css('visibility', function(i, visibility) {
+        return (visibility == 'visible') ? 'hidden' : 'visible';
+    });
+};
