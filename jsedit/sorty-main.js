@@ -25,7 +25,15 @@ $(document).ready(function(){
 	var prevWork = $.jStorage.get('containers', '');
 	if (prevWork !== '') {
 		// There is some previous work. Restore and bypass Wizard
+		var allowClose = false;
 		$("#wndwContProj").modal({ keyboard: false });
+		$("#wndwContProj").on('hide', function(e) {
+			if (allowClose) {
+				return true;
+			} else {
+				return false;
+			}
+		});
 		$('#wndwContProj').on('shown', function() {
 			var parentContainer = $(this);
 			$("#wndwContProj").one('keydown.return', function() {
@@ -38,6 +46,7 @@ $(document).ready(function(){
 
 			$("#btn-continue", parentContainer).one('click',function() {
 				// User confirmed
+				allowClose = true;
 				$('#sortyspace').html(prevWork);
 				$('#itemspace').html($.jStorage.get('items'));
 				container_name = $.jStorage.get('container_name');
@@ -58,6 +67,7 @@ $(document).ready(function(){
 
 			$("#btn-restart", parentContainer).one('click',function() {
 				// User declined
+				allowClose = true;
 				$.jStorage.deleteKey('containers');
 				startNewProject();
 				
@@ -77,10 +87,16 @@ $(document).ready(function(){
 		item_name = $('#item_name').val().toLowerCase();
 		updatePlaceholders();
 
-		$("#wndwNew").modal({
-			keyboard: false
-		});
+		$("#wndwNew").modal({ keyboard: false });
 		// modal box events
+		$('#wndwNew').on('hide', function(e) {
+			if(container_size>0) {
+				// Allow to hide if form has been filled out
+				return true;
+			} else {
+				return false;
+			}
+		});
 		$('#wndwNew').on('shown', function() {
 			var parentElement = $("#wndwNew");
 			// select first item in the list (highlight all text)
@@ -144,7 +160,7 @@ $(document).ready(function(){
 		$(".bucket-header").disableSelection();
 		$(".bucket-header").live('dblclick', function(e) {
 
-			var parentContainer = $(this).parent();
+			var parentContainer = $(this).parent();  console.log(parentContainer);
 			var oldSize = getContainerSize(parentContainer);
 			var oldName = getContainerName(parentContainer);
 
@@ -160,6 +176,7 @@ $(document).ready(function(){
 				});
 				$(inpField).one('keydown.esc', function() {
 					// Cancelled new value (restore old name)
+					$(inpField).remove();
 					$("#name",parentContainer).html(oldName); return false;
 				});
 
@@ -171,9 +188,17 @@ $(document).ready(function(){
 					}
 					else {
 						// No valid name provided, ask if want to delete
+						var allowClose = false; 
 						$("#name",parentContainer).html("* * *");
 						$("#wndwDeleteContainer").modal({ keyboard: false });
 						// modal box events
+						$('#wndwDeleteContainer').on('hide', function() {
+							if (allowClose) {
+								return true;
+							} else {
+								return false;
+							}
+						});
 						$('#wndwDeleteContainer').on('shown', function() {
 							//var parentContainer = $(this);
 							var parentWindow = $(this);
@@ -181,8 +206,13 @@ $(document).ready(function(){
 							parentWindow.one('keydown.return', function() {
 								$("#btn-delete", parentWindow).trigger('click'); return false;
 							});
+							$("#btn-delete", parentWindow).off();
 							$("#btn-delete", parentWindow).one('click',function() {
 								// Remove container
+								allowClose 	= true;
+								console.log("parentContainer: ");
+								console.log(parentContainer);
+
 								removeContainer(parentContainer);
 								parentWindow.modal('hide');
 								return false;
@@ -192,8 +222,10 @@ $(document).ready(function(){
 							parentWindow.one('keydown.esc', function() {
 								$("#btn-cancel", parentWindow).trigger('click'); return false;
 							});
+							$("#btn-cancel", parentWindow).off();
 							$("#btn-cancel", parentWindow).one('click',function() {
 								// Restore old name, do not delete container
+								allowClose 	= true;
 								$("#name",parentContainer).html(oldName);
 								parentWindow.modal('hide');
 								return false;
@@ -280,17 +312,27 @@ $(document).ready(function(){
 					}
 					else {
 						// No valid name provided, ask if want to delete
+						var allowClose = false;
 						$("a",clickedItem).html("* * *");
 						$("#wndwDeleteItem").modal({ keyboard: false });
 						// modal box events
+						$('#wndwDeleteItem').on('hide', function() {
+							if (allowClose) {
+								return true;
+							} else {
+								return false;
+							}
+						});
 						$('#wndwDeleteItem').on('shown', function() {
 							var parentContainer = $("#wndwDeleteItem");
 							// Return or Delete confirmed
 							parentContainer.one('keydown.return', function() {
 								$("#btn-delete", parentContainer).trigger('click'); return false;
 							});
+							$("#btn-delete", parentContainer).off();
 							$("#btn-delete", parentContainer).one('click',function() {
 								// Remove item
+								allowClose = true;
 								removeItem(clickedItem);
 								parentContainer.modal('hide');
 								return false;
@@ -300,8 +342,10 @@ $(document).ready(function(){
 							parentContainer.one('keydown.esc', function() {
 								$("#btn-cancel", parentContainer).trigger('click'); return false;
 							});
+							$("#btn-cancel", parentContainer).off();
 							$("#btn-cancel", parentContainer).one('click',function() {
-								// Restore old name, do not delete tem
+								// Restore old name, do not delete them
+								allowClose = true;
 								$("a",clickedItem).html(oldName);
 								parentContainer.modal('hide');
 								return false;
@@ -613,17 +657,29 @@ $(document).ready(function(){
 		$("#menuAddItem").trigger('click'); return false;
 	});
 	$("#menuAddItem").live('click',function() {
+		var allowClose = false;
+		// Reset contents now, before the box is shown
+		$("#item_list", $("#wndwAddItems")).val("");
 		// Add another item(s)
 		$("#wndwAddItems").find(".item_name_placeholder").text(titleCaps(item_name));
 		$("#wndwAddItems").modal({ keyboard: false });
 		// modal box events
+		$('#wndwAddItems').on('hide', function() {
+			if (allowClose) {
+				return true;
+			} else {
+				return false;
+			}
+		});
 		$('#wndwAddItems').on('shown', function() {
 			var parentElement = $(this);
 			// select first item in the list (highlight all text)
 			$("#item_list", parentElement).focus().select();	
 
 			// add
+			$("#btn-add", parentElement).off();
 			$("#btn-add", parentElement).one('click',function() {
+				allowClose = true;
 				removeHelpText();
 				var item_list = $("#item_list").val();
 				if(item_list.length>0) {
@@ -644,7 +700,9 @@ $(document).ready(function(){
 				$("#btn-cancel", parentElement).trigger('click'); 
 				return false;
 			});
+			$("#btn-cancel", parentElement).off();
 			$("#btn-cancel", parentElement).one('click',function() {
+				allowClose = true;
 				$(document).focus(); // need to reset, otherwise can't catch keypresses
 				parentElement.modal('hide');
 				return false;
@@ -696,7 +754,7 @@ $(document).ready(function(){
 			$("textarea", parentElement).one('keydown.esc', function(e) {
 				$("#btn-ok", parentElement).trigger('click'); return false;
 			});
-
+			$("#btn-ok", parentElement).off();
 			$("#btn-ok", parentElement).one('click', function() {
 				$(document).focus(); // need to reset, otherwise can't catch keypresses
 				parentElement.modal('hide'); 
@@ -719,6 +777,7 @@ $(document).ready(function(){
 			parentContainer.one('keydown.return', function() {
 				$("#btn-delete", parentContainer).trigger('click'); return false;
 			});
+			$("#btn-delete", parentContainer).off();
 			$("#btn-delete", parentContainer).one('click',function() {
 				// Remove all saved data, reload page
 				$.jStorage.deleteKey('containers');
@@ -730,6 +789,7 @@ $(document).ready(function(){
 			parentContainer.one('keydown.esc', function() {
 				$("#btn-cancel", parentContainer).trigger('click'); return false;
 			});
+			$("#btn-cancel", parentContainer).off();
 			$("#btn-cancel", parentContainer).one('click',function() {
 				parentContainer.modal('hide');
 				return false;
@@ -755,15 +815,24 @@ $(document).ready(function(){
 		});
 		$("#containers_changes",$("#wndwEditContainers")).text(editString);
 
+		var allowClose = false;
 		// Show edit dialog
 		$("#wndwEditContainers").modal({ keyboard: false });
-
+		$('#wndwEditContainers').on('hide', function() {
+			if (allowClose) {
+				return true;
+			} else {
+				return false;
+			}
+		});
 		$("#wndwEditContainers").on("shown",function(){
 			var parentElement = $(this);
 			$("#containers_changes",parentElement).focus().select();
 
 			// change
+			$("#btn-change", parentElement).off();
 			$("#btn-change", parentElement).one('click',function() {
+				allowClose = true;
 				var containers_changes = $("#containers_changes",parentElement).val();
 
 				// Parse new input
@@ -795,7 +864,9 @@ $(document).ready(function(){
 				$("#btn-cancel", parentElement).trigger('click'); 
 				return false;
 			});
+			$("#btn-cancel", parentElement).off();
 			$("#btn-cancel", parentElement).one('click',function() {
+				allowClose = true;
 				$(document).focus(); // need to reset, otherwise can't catch keypresses
 				parentElement.modal('hide');
 				return false;
@@ -887,6 +958,7 @@ $(document).ready(function(){
 			keyboard: true
 		});
 		// modal box handles
+		$("#btn-ok",$('#wndwAbout')).off();
 		$("#btn-ok",$('#wndwAbout')).one('click',function() {
 			$("#wndwAbout").modal('hide');
 		});
