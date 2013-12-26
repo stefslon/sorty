@@ -166,7 +166,7 @@ $(document).ready(function(){
 
 			if(oldName!="") {
 				// In-inline container editing
-				var inpField = $('<input class="bucket-name-input" type="text" id="inpNewName" name="inpNewName" value="' + oldName + '" />');
+				var inpField = $('<input class="bucket-name-input" type="text" id="inpNewName" name="inpNewName" value="' + oldName.replace(/\"/g, "") + '" />');
 				$("#name",$(this)).html(inpField);
 				$(inpField).focus().select();
 				
@@ -291,7 +291,7 @@ $(document).ready(function(){
 
 			if(oldName!="") {
 				// In-inline container editing
-				var inpField = $('<input class="item-name-input" type="text" id="inpNewName" name="inpNewName" value="' + oldName + '" />');
+				var inpField = $('<input class="item-name-input" type="text" id="inpNewName" name="inpNewName" value="' + oldName.replace(/\"/g, "") + '" />');
 				$("a",clickedItem).html(inpField);
 				$(inpField).focus().select();
 				
@@ -477,8 +477,17 @@ $(document).ready(function(){
 		if ( container.attr('id') != 'workarea' ) {
 			// Update any container except for sortyspace
 			var allChildren = $("li", container);
+			// Count items (if there is a "&"" in the name this is a couple so there are two)
+			var numChildren = 0;
+			allChildren.each(function(idx,val){
+				if ($(val).html().indexOf("&amp;") != -1) {
+					numChildren+=2;
+				} else {
+					numChildren++;
+				}
+			});
 			var totSize = $("#size", container).text();
-			var numAvail = totSize - allChildren.length;
+			var numAvail = totSize - numChildren; //allChildren.length;
 			console.log("updateContainer: "+totSize+", "+numAvail);
 			//console.log('Update container ' +allChildren.length+ ' out of ' +totSize);
 			$(".selection-list",container).animate({"min-height": elemHeight*totSize},500);
