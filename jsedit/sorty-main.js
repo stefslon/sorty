@@ -950,6 +950,10 @@ $(document).ready(function(){
 			});
 
 		});
+		
+		doc.setProperties({
+			title: "Sorty Export"
+		});
 
 		try {
 			// Output as Data URI in a new window
