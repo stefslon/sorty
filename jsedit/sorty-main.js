@@ -481,7 +481,7 @@ $(document).ready(function(){
 			var numChildren = 0;
 			allChildren.each(function(idx,val){
 				if ($(val).html().indexOf("&amp;") != -1) {
-					numChildren+=(mainStr.split("&amp;").length - 1);
+					numChildren+=($(val).html().split("&amp;").length - 1);
 					//numChildren+=2;
 				} else {
 					numChildren++;
