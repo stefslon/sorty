@@ -910,8 +910,8 @@ $(document).ready(function(){
 		// Start new PDF document
 		var doc = new jsPDF('l','pt',[maxWidth+2*widthMargin,maxHeight+2*heightMargin]);
 
-		doc.addFont("fonts/PT_Sans_Narrow.ttf", "PTSans", "normal");
-		doc.addFont("fonts/PT_Sans_Narrow_Bold.ttf", "PTSans", "bold");
+		doc.addFont("fonts/PT_Sans.ttf", "PTSans", "normal");
+		doc.addFont("fonts/PT_Sans_Bold.ttf", "PTSans", "bold");
 
 		// Standard output header
 		doc.setFont("PTSans");
