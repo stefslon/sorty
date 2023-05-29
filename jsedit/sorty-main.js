@@ -18,9 +18,9 @@ var item_name;
 
 var elemHeight = 24; // approximate element height for container sizing
 
-
+var jsPDF = window.jspdf.jsPDF;
 $(document).ready(function(){
-
+	
 	// Check if there is a previously saved work
 	var prevWork = $.jStorage.get('containers', '');
 	if (prevWork !== '') {
@@ -910,7 +910,11 @@ $(document).ready(function(){
 		// Start new PDF document
 		var doc = new jsPDF('l','pt',[maxWidth+2*widthMargin,maxHeight+2*heightMargin]);
 
+		doc.addFont("fonts/PT_Sans_Narrow.ttf", "PTSans", "normal");
+		doc.addFont("fonts/PT_Sans_Narrow_Bold.ttf", "PTSans", "bold");
+
 		// Standard output header
+		doc.setFont("PTSans");
 		doc.setFontSize(7);
 		var d = new Date();
 		var dstr = d.getMonth()+"/"+d.getDate()+"/"+d.getFullYear()+" "+d.getHours()+":"+d.getMinutes();
@@ -929,9 +933,9 @@ $(document).ready(function(){
 			doc.roundedRect(bucketX, bucketY, $(val).width(), $(val).height(), 10, 10, 'FD'); // empty square
 			
 			// Add container name
-			doc.setFontType("bold");
+			doc.setFont("PTSans", "bold");
 			doc.text(bucketX+8, bucketY+16, getContainerName($(val)));
-			doc.setFontType("normal");
+			doc.setFont("PTSans", "normal");
 
 			// Add container size
 			doc.setFillColor(255,255,255);
