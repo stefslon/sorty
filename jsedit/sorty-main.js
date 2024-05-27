@@ -477,7 +477,7 @@ $(document).ready(function(){
 		if ( container.attr('id') != 'workarea' ) {
 			// Update any container except for sortyspace
 			var allChildren = $("li", container);
-			// Count items (if there is a "&"" in the name this is a couple so there are two)
+			// Count items (if there is a "&" in the name this is a couple so there are two)
 			var numChildren = 0;
 			allChildren.each(function(idx,val){
 				if ($(val).html().indexOf("&amp;") != -1) {
@@ -930,26 +930,32 @@ $(document).ready(function(){
 			var bucketY = $(val).position().top+heightMargin;
 
 			doc.setFillColor(255,255,255);
-			doc.setLineWidth(2);
+			doc.setLineWidth(1.5);
 			doc.roundedRect(bucketX, bucketY, $(val).width(), $(val).height(), 10, 10, 'FD'); // empty square
-			doc.setLineWidth(1);
 
 			// Add container name
 			doc.setFont("PTSans", "bold");
 			doc.text(bucketX+8, bucketY+18, getContainerName($(val)));
 
 			// Add container size
+			var numItems = $(".item",$(val)).length;
+			var numDigits = (numItems>0) ? (Math.floor(Math.log10(numItems))) : 0;
 			doc.setFont("PTSans", "normal");
 			doc.setFillColor(255,255,255);
-			doc.text(bucketX+$(val).width()/1.2-10-4, bucketY+18, "Fits " + getContainerSize($(val)));
+			doc.text(bucketX+$(val).width()/1.2-14-numDigits*8, bucketY+18, "Fits " + getContainerSize($(val)));
 
+			// Add divider line
+			doc.setLineWidth(0.75);
 			doc.line(bucketX, bucketY+25, bucketX+$(val).width(), bucketY+25);
 
 			// Go through all items in the bucket
 			var itemNum = 1;
+			var numWidth = 12 + numDigits*8;
 			$(".item",$(val)).each(function(idx2,val2) {
-				var splitItem= doc.splitTextToSize(itemNum+". "+$(val2).text(), $(val).width()-14);
-				doc.text(bucketX+$(val2).position().left-8, bucketY+$(val2).position().top, splitItem);
+				doc.text(bucketX+$(val2).position().left-8, bucketY+$(val2).position().top, itemNum+".");
+
+				var splitItem = doc.splitTextToSize($(val2).text(), $(val).width()-14-numWidth);
+				doc.text(bucketX+$(val2).position().left-8+numWidth, bucketY+$(val2).position().top, splitItem);
 				itemNum = itemNum+1;
 			});
 
