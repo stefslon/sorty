@@ -944,7 +944,7 @@ $(document).ready(function(){
 			doc.text(bucketX+8, bucketY+18, getContainerName($(val)));
 
 			// Add container size
-			var numItems = $(".item",$(val)).length;
+			var numItems = getContainerChildren($(val)); //$(".item",$(val)).length;
 			var numDigits = (numItems>0) ? (Math.floor(Math.log10(numItems))) : 0;
 			doc.setFont("PTSans", "normal");
 			doc.setFillColor(255,255,255);
@@ -955,14 +955,19 @@ $(document).ready(function(){
 			doc.line(bucketX, bucketY+25, bucketX+$(val).width(), bucketY+25);
 
 			// Go through all items in the bucket
+            var extraYShift = 0;
 			var itemNum = 1;
 			var numWidth = 12 + numDigits*8;
 			$(".item",$(val)).each(function(idx2,val2) {
-				doc.text(bucketX+$(val2).position().left-8, bucketY+$(val2).position().top, itemNum+".");
+				doc.text(bucketX+$(val2).position().left-8, bucketY+$(val2).position().top+extraYShift, itemNum+".");
 
 				var splitItem = doc.splitTextToSize($(val2).text(), $(val).width()-14-numWidth);
-				doc.text(bucketX+$(val2).position().left-8+numWidth, bucketY+$(val2).position().top, splitItem);
+				doc.text(bucketX+$(val2).position().left-8+numWidth, bucketY+$(val2).position().top+extraYShift, splitItem);
 				itemNum = itemNum+1;
+                if (splitItem.length>1 && $(val2).height()<=22) {
+                    extraYShift += $(val2).height()*(splitItem.length-1)*0.7;
+                }
+                //console.log($(val2).text() + " --> " + splitItem.length + " / " + $(val2).height() + " ==> " + extraYShift);
 			});
 
 		});
