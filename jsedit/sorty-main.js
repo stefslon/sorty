@@ -1,7 +1,7 @@
 /*
 
   S.Slonevskiy
-  November 2012-2024
+  November 2012-2025
 
 */
 
@@ -471,24 +471,30 @@ $(document).ready(function(){
 		jNewContainer.hide().visible().fadeIn(1000);
 	}
 
+    // Count the number of occupants in the bucket
+    function getContainerChildren(container) {
+        var allChildren = $("li", container);
+        var numChildren = 0;
+        allChildren.each(function(idx,val){
+            if ($(val).html().indexOf("&amp;") != -1) {
+                numChildren+=($(val).html().split("&amp;").length);
+            } else if ($(val).html().indexOf(" и ") != -1) {
+                numChildren+=($(val).html().split(" и ").length);
+            } else {
+                numChildren++;
+            }
+        });
+        return numChildren;
+    }
 
 	// Update container information upon some event (add, remove, etc.)
 	function updateContainer(container) {
 		if ( container.attr('id') != 'workarea' ) {
 			// Update any container except for sortyspace
-			var allChildren = $("li", container);
 			// Count items (if there is a "&" in the name this is a couple so there are two)
-			var numChildren = 0;
-			allChildren.each(function(idx,val){
-				if ($(val).html().indexOf("&amp;") != -1) {
-					numChildren+=($(val).html().split("&amp;").length);
-					//numChildren+=2;
-				} else {
-					numChildren++;
-				}
-			});
+            var numChildren = getContainerChildren(container);
 			var totSize = $("#size", container).text();
-			var numAvail = totSize - numChildren; //allChildren.length;
+			var numAvail = totSize - numChildren; 
 			console.log("updateContainer: "+totSize+", "+numAvail);
 			//console.log('Update container ' +allChildren.length+ ' out of ' +totSize);
 			$(".selection-list",container).animate({"min-height": elemHeight*totSize},500);
@@ -942,7 +948,7 @@ $(document).ready(function(){
 			var numDigits = (numItems>0) ? (Math.floor(Math.log10(numItems))) : 0;
 			doc.setFont("PTSans", "normal");
 			doc.setFillColor(255,255,255);
-			doc.text(bucketX+$(val).width()/1.2-14-numDigits*8, bucketY+18, "Fits " + getContainerSize($(val)));
+			doc.text(bucketX+$(val).width()/1.2-14-numDigits*8, bucketY+18, getContainerChildren($(val)) + " / " + getContainerSize($(val)));
 
 			// Add divider line
 			doc.setLineWidth(0.75);
